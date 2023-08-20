@@ -3,6 +3,7 @@ package handler
 import (
 	"crowfunding/helper"
 	"crowfunding/models"
+	"crowfunding/request"
 	"crowfunding/services"
 	"net/http"
 
@@ -18,7 +19,7 @@ func NewUserHandler(userService services.UserService) *userHandler {
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
-	var input models.CreateRegister
+	var input request.CreateRegister
 
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
@@ -40,6 +41,37 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 	formatter := models.FormaterUser(newUser, "token")
 
 	response := helper.APIResponse("Account has been registered", http.StatusOK, "success", formatter)
+
+	c.JSON(http.StatusOK, response)
+
+}
+
+func (h *userHandler) Login(c *gin.Context) {
+	var input request.Login
+
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errors := helper.FormatValidationError(err)
+		errorMessage := gin.H{"errors": errors}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	loggedinUser, err := h.userService.Login(input)
+
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+
+		response := helper.APIResponse("Login failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	formatter := models.FormaterUser(loggedinUser, "token")
+
+	response := helper.APIResponse("Successfuly loggedin", http.StatusOK, "success", formatter)
 
 	c.JSON(http.StatusOK, response)
 

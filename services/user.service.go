@@ -3,12 +3,15 @@ package services
 import (
 	"crowfunding/models"
 	repository "crowfunding/repositories"
+	"crowfunding/request"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
-	RegisterUser(input models.CreateRegister) (models.User, error)
+	RegisterUser(input request.CreateRegister) (models.User, error)
+	Login(input request.Login) (models.User, error)
 }
 
 type userService struct {
@@ -19,7 +22,7 @@ func NewUserService(repository repository.UserRepository) *userService {
 	return &userService{repository}
 }
 
-func (s *userService) RegisterUser(input models.CreateRegister) (models.User, error) {
+func (s *userService) RegisterUser(input request.CreateRegister) (models.User, error) {
 	user := models.User{}
 	user.Name = input.Name
 	user.Email = input.Email
@@ -36,5 +39,27 @@ func (s *userService) RegisterUser(input models.CreateRegister) (models.User, er
 		return newUser, err
 	}
 	return newUser, nil
+
+}
+
+func (s *userService) Login(input request.Login) (models.User, error) {
+	email := input.Email
+	password := input.Password
+
+	user, err := s.repository.FindByEmail(email)
+	if err != nil {
+		return user, err
+	}
+
+	if user.ID == 0 {
+		return user, errors.New("No user found on that email")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return user, err
+	}
+
+	return user, nil
 
 }
