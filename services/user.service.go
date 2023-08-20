@@ -14,6 +14,7 @@ type UserService interface {
 	Login(input request.Login) (models.User, error)
 	IsEmailAvailable(input request.CheckEmail) (bool, error)
 	SaveAvatar(ID int, fileLocation string) (models.User, error)
+	GetUserByID(ID int) (models.User, error)
 }
 
 type userService struct {
@@ -95,4 +96,17 @@ func (s *userService) SaveAvatar(ID int, fileLocation string) (models.User, erro
 	}
 
 	return updatedUser, nil
+}
+
+func (s *userService) GetUserByID(ID int) (models.User, error) {
+	user, err := s.repository.FindByID(ID)
+	if err != nil {
+		return user, err
+	}
+
+	if user.ID == 0 {
+		return user, errors.New("No user found on with that ID")
+	}
+
+	return user, nil
 }
