@@ -4,7 +4,6 @@ import (
 	"crowfunding/handler"
 	repository "crowfunding/repositories"
 	"crowfunding/services"
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -23,11 +22,7 @@ func main() {
 	userRepository := repository.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
 	authService := services.NewService()
-	log, err := authService.GenerateToken(1)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	fmt.Println(log)
+
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	router := gin.Default()
