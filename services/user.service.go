@@ -12,7 +12,8 @@ import (
 type UserService interface {
 	RegisterUser(input request.CreateRegister) (models.User, error)
 	Login(input request.Login) (models.User, error)
-	IsEmailAvailable(inpput request.CheckEmail) (bool, error)
+	IsEmailAvailable(input request.CheckEmail) (bool, error)
+	SaveAvatar(ID int, fileLocation string) (models.User, error)
 }
 
 type userService struct {
@@ -78,4 +79,20 @@ func (s *userService) IsEmailAvailable(input request.CheckEmail) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (s *userService) SaveAvatar(ID int, fileLocation string) (models.User, error) {
+	user, err := s.repository.FindByID(ID)
+	if err != nil {
+		return user, err
+	}
+
+	user.AvatarFileName = fileLocation
+
+	updatedUser, err := s.repository.Update(user)
+	if err != nil {
+		return user, nil
+	}
+
+	return updatedUser, nil
 }
