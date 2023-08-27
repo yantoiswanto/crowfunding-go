@@ -24,10 +24,14 @@ func main() {
 	}
 
 	userRepository := repository.NewUserRepository(db)
+	campaignRepository := repository.NewCampaignRepository(db)
+
 	userService := services.NewUserService(userRepository)
+	campaignService := services.NewCampaignService(campaignRepository)
 	authService := services.NewService()
 
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHander := handler.NewCampaignHandler(campaignService)
 
 	router := gin.Default()
 	api := router.Group("api/v1")
@@ -36,6 +40,8 @@ func main() {
 	api.POST("/sessions", userHandler.Login)
 	api.POST("/email_checkers", userHandler.CheckEmailAvaibality)
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+
+	api.GET("/campaigns", campaignHander.GetCampaigns)
 
 	router.Run()
 

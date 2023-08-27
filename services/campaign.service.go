@@ -6,18 +6,18 @@ import (
 )
 
 type CampaignService interface {
-	FindCampaigns(userID int) ([]models.Campaign, error)
+	GetCampaigns(userID int) ([]models.Campaign, error)
 }
 
-type campaignService struct {
+type service struct {
 	repository repositories.CampaignRepository
 }
 
-func NewServiceCampaign(campaignRepository repositories.CampaignRepository) *campaignService {
-	return &campaignService{campaignRepository}
+func NewCampaignService(repository repositories.CampaignRepository) *service {
+	return &service{repository}
 }
 
-func (s *campaignService) FindCampaigns(userID int) ([]models.Campaign, error) {
+func (s *service) GetCampaigns(userID int) ([]models.Campaign, error) {
 	if userID != 0 {
 		campaigns, err := s.repository.FindByUserID(userID)
 		if err != nil {

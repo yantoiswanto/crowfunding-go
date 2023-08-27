@@ -21,7 +21,7 @@ func NewCampaignRepository(db *gorm.DB) *campaignRepository {
 
 func (r *campaignRepository) FindAll() ([]models.Campaign, error) {
 	var campaigns []models.Campaign
-	err := r.db.Preload("CampaignImages", "campaign_images.is_primaty = 1").Find(campaigns).Error
+	err := r.db.Preload("CampaignImages", "campaign_images.is_primary = 1").Find(&campaigns).Error
 	if err != nil {
 		return campaigns, err
 	}
