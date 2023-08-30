@@ -3,10 +3,12 @@ package services
 import (
 	"crowfunding/models"
 	"crowfunding/repositories"
+	"crowfunding/request"
 )
 
 type CampaignService interface {
 	GetCampaigns(userID int) ([]models.Campaign, error)
+	GetCampaignByID(input request.GetCampaignDeatilInput) (models.Campaign, error)
 }
 
 type service struct {
@@ -33,4 +35,13 @@ func (s *service) GetCampaigns(userID int) ([]models.Campaign, error) {
 	}
 
 	return campaigns, nil
+}
+
+func (s *service) GetCampaignByID(input request.GetCampaignDeatilInput) (models.Campaign, error) {
+	campaign, err := s.repository.FindByID(input.ID)
+	if err != nil {
+		return campaign, err
+	}
+
+	return campaign, nil
 }
