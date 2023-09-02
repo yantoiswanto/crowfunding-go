@@ -4,6 +4,7 @@ import (
 	"crowfunding/models"
 	"crowfunding/repositories"
 	"crowfunding/request"
+	"errors"
 	"fmt"
 
 	"github.com/gosimple/slug"
@@ -13,6 +14,7 @@ type CampaignService interface {
 	GetCampaigns(userID int) ([]models.Campaign, error)
 	GetCampaignByID(input request.GetCampaignDeatilInput) (models.Campaign, error)
 	CreateCampaign(input request.CreateCampaign) (models.Campaign, error)
+	UpdateCampaign(inputID request.GetCampaignDeatilInput, inputData request.CreateCampaign) (models.Campaign, error)
 }
 
 type service struct {
@@ -68,4 +70,29 @@ func (s *service) CreateCampaign(input request.CreateCampaign) (models.Campaign,
 	}
 
 	return newCampaign, nil
+}
+
+func (s *service) UpdateCampaign(inputID request.GetCampaignDeatilInput, inputData request.CreateCampaign) (models.Campaign, error) {
+	campaign, err := s.repository.FindByID(inputID.ID)
+	if err != nil {
+		return campaign, err
+	}
+
+	if campaign.UserID != inputData.User.ID {
+		return campaign, errors.New("Not an owner of the campaign")
+	}
+
+	campaign.Name = inputData.Name
+	campaign.ShortDescription = inputData.ShortDescription
+	campaign.Description = inputData.Description
+	campaign.Perks = inputData.Perks
+	campaign.GoalAmount = inputData.GoalAmount
+
+	updatedCampaign, err := s.repository.Update(campaign)
+	if err != nil {
+		return updatedCampaign, err
+	}
+
+	return updatedCampaign, nil
+
 }
